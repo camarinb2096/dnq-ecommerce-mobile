@@ -1,0 +1,9 @@
+1. npm install
+
+2. npx expo start
+
+
+in case of noty working : 
+
+npm install -g react-native-cli 
+
