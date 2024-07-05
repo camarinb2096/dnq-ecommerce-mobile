@@ -4,7 +4,10 @@ Deployed with:
 
 Expo Go
 
-![image info](screen.png)
+![image info](weather-0.jpg)
+![image info](weather-1.jpg)
+![image info](weather-2.jpg)
+![image info](weather-3.jpg)
 
 This is an online store mobile app made in react-native framework.
 
