@@ -1,5 +1,8 @@
+# online-store-api-app-mobile
 
-![Test Image 2](screen.png)
+
+![image info](screen.png)
+
 
 
 
@@ -8,7 +11,7 @@
 2. npx expo start
 
 
-in case of noty working : 
+in case of not working : 
 
 npm install -g react-native-cli 
 
