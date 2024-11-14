@@ -1,69 +1,175 @@
-import React, { useEffect, useState } from 'react'
-import { View, Text, TouchableOpacity, FlatList, Image } from 'react-native'
+import React, { useState, useEffect } from 'react';
+import { View, FlatList, TouchableOpacity, Text, Image, StyleSheet, TextInput } from 'react-native';
 import { AntDesign } from '@expo/vector-icons';
+import { getProducts } from '../service/productService';
 import Animated, { FadeInLeft } from 'react-native-reanimated';
 
-import { getProducts } from '../service/productService'
-
 const HomeScreen = ({ route, navigation }) => {
-
-    const [products, setProducts] = useState([])
+    const [products, setProducts] = useState([]);
+    const [filteredProducts, setFilteredProducts] = useState([]);
+    const [search, setSearch] = useState('');
 
     useEffect(() => {
-
         const fetchData = async () => {
-            const data = await getProducts()
-            setProducts(data)
-
-        }
+            const response = await getProducts();
+            setProducts(response.data); // Acceder a la propiedad 'data'
+            setFilteredProducts(response.data); // Inicializar los productos filtrados
+        };
         fetchData();
-
     }, []);
 
+    const handleSearch = (text) => {
+        setSearch(text);
+        if (text) {
+            const filtered = products.filter((item) =>
+                item.name.toLowerCase().includes(text.toLowerCase())
+            );
+            setFilteredProducts(filtered);
+        } else {
+            setFilteredProducts(products);
+        }
+    };
+
     const navigateToProduct = (id) => {
-        navigation.navigate('Product', { productId: id })
-    }
+        navigation.navigate('Product', { productId: id });
+    };
 
     return (
-        <View style={{ backgroundColor: '#dfe6ec', flex: 1, paddingHorizontal: 20, paddingVertical: 30 }}>
+        <View style={styles.container}>
+            {/* Encabezado con Logo y Barra de Búsqueda */}
+            <View style={styles.header}>
+                <Image
+                    source={require('../../assets/favicon.png')} // Cambia la ruta según tu proyecto
+                    style={styles.logo}
+                    resizeMode="contain"
+                />
+                <View style={styles.searchContainer}>
+                    <AntDesign name="search1" size={20} color="#aaa" style={styles.searchIcon} />
+                    <TextInput
+                        style={styles.searchInput}
+                        placeholder="Buscar productos..."
+                        value={search}
+                        onChangeText={handleSearch}
+                    />
+                </View>
+            </View>
 
-            <AntDesign name="tags" size={32} color="#797979" style={{ alignSelf: 'center', marginBottom: 16 }} />
-
+            {/* Lista de Productos */}
             <FlatList
-                data={products}
-                renderItem={({ item }) =>
-
-                    <Animated.View entering={FadeInLeft.delay(500).duration(1000)} style={{ flex: 1 }}>
-                        <TouchableOpacity key={item.id} style={{ backgroundColor: '#FFF', marginBottom: 32, padding: 12, borderRadius: 10 }}
-                            onPress={() => navigateToProduct(item.id)}>
-                            <AntDesign name="hearto" size={24} color="#71acf5" />
-                            <Image
-                                style={{ width: '100%', height: 250, resizeMode: 'contain', marginBottom: 12 }}
-                                source={{ uri: item.image }}
-                            />
-
-                            <Text style={{ fontSize: 14, fontWeight: '600', color: '#797979' }}>{item.title}</Text>
-                            <Text style={{ fontSize: 12, fontWeight: '300', marginTop: 8, color: '#797979' }}>{item.category.toUpperCase()}</Text>
-                            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 8 }}>
-                                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                                    <AntDesign name="star" size={20} color="#71acf5" />
-                                    <Text style={{ fontSize: 12, fontWeight: '600', color: '#797979', marginLeft: 4 }}>{item.rating.rate}</Text>
-                                </View>
-
-                                <Text style={{ fontSize: 16, fontWeight: '600', color: '#71acf5' }}>{'$' + item.price}</Text>
+                data={filteredProducts}
+                renderItem={({ item }) => (
+                    <Animated.View entering={FadeInLeft.delay(300).duration(800)} style={styles.animatedView}>
+                        <TouchableOpacity
+                            style={styles.card}
+                            onPress={() => navigateToProduct(item.id)}
+                        >
+                            {/* Imagen del Producto */}
+                            <View style={styles.imageContainer}>
+                                <Image
+                                    source={{ uri: item.image }}
+                                    style={styles.productImage}
+                                    resizeMode="cover"
+                                />
+                                {/* Nombre del Producto */}
+                                <Text style={styles.productName}>{item.name}</Text>
                             </View>
 
-                            <TouchableOpacity style={{ padding: 8, justifyContent: 'center', alignItems: 'center', borderWidth: 2, borderColor: '#71acf5', marginTop: 12, borderRadius: 10 }}>
-                                <Text style={{ fontSize: 14, fontWeight: '600', color: '#71acf5' }}>Add To Cart</Text>
-                            </TouchableOpacity>
+                            {/* Detalles del Producto */}
+                            <View style={styles.productDetails}>
+                                <Text style={styles.productPrice}>${item.price.toFixed(2)}</Text>
+                            </View>
                         </TouchableOpacity>
                     </Animated.View>
-                }
-                keyExtractor={item => item.id}
+                )}
+                keyExtractor={(item) => item.id.toString()}
             />
-
         </View>
-    )
-}
+    );
+};
+
+const styles = StyleSheet.create({
+    container: {
+        backgroundColor: '#f5f5f5',
+        flex: 1,
+    },
+    header: {
+        width: '100%',
+        paddingVertical: 10,
+        backgroundColor: '#fff',
+        borderBottomWidth: 1,
+        borderBottomColor: '#ddd',
+        alignItems: 'center',
+    },
+    logo: {
+        width: 120, // Ajusta el tamaño del logo
+        height: 40,
+        marginBottom: 10,
+    },
+    searchContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: '#f0f0f0',
+        borderRadius: 8,
+        width: '90%',
+        paddingHorizontal: 10,
+        paddingVertical: 5,
+    },
+    searchIcon: {
+        marginRight: 8,
+    },
+    searchInput: {
+        flex: 1,
+        height: 40,
+        fontSize: 16,
+    },
+    animatedView: {
+        flex: 1,
+        alignSelf: 'stretch',
+    },
+    card: {
+        backgroundColor: '#ffffff',
+        borderRadius: 10,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 8,
+        elevation: 5,
+        marginBottom: 16,
+        overflow: 'hidden',
+    },
+    imageContainer: {
+        position: 'relative',
+        width: '100%',
+        height: 180,
+    },
+    productImage: {
+        width: '100%',
+        height: '100%',
+        borderRadius: 10,
+    },
+    productName: {
+        position: 'absolute',
+        bottom: 10,
+        left: 10,
+        backgroundColor: 'rgba(255, 255, 255, 0.8)',
+        paddingHorizontal: 8,
+        paddingVertical: 4,
+        borderRadius: 5,
+        fontSize: 14,
+        fontWeight: 'bold',
+        color: '#000',
+    },
+    productDetails: {
+        padding: 16,
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+    },
+    productPrice: {
+        fontSize: 18,
+        fontWeight: '600',
+        color: '#4CAF50',
+    },
+});
 
 export default HomeScreen;

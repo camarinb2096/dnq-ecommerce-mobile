@@ -1,10 +1,10 @@
 import axios from 'axios';
 
-const API_URL = "https://fakestoreapi.com"
+const API_URL = "https://dnq-backend-v1.onrender.com"
 
 const getProducts = async () => {
     return new Promise((resolve, reject) => {
-        axios.get(API_URL + '/products?limit=10')
+        axios.get(API_URL + '/api/v1/products/?page=1&pageSize=5')
             .then((res) => {
                 resolve(res.data)
             })
@@ -16,7 +16,7 @@ const getProducts = async () => {
 
 const getProductById = async (id) => {
     return new Promise((resolve, reject) => {
-        axios.get(API_URL + '/products/' + id)
+        axios.get(API_URL + '/api/v1/products/' + id)
             .then((res) => {
                 resolve(res.data)
             })
